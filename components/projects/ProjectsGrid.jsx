@@ -5,25 +5,19 @@ import { projectsData } from '../../data/projectsData';
 import ProjectsFilter from './ProjectsFilter';
 
 function ProjectsGrid() {
-	const [searchProject, setSearchProject] = useState();
-	const [selectProject, setSelectProject] = useState();
+	const [searchProject, setSearchProject] = useState('');
+	const [selectProject, setSelectProject] = useState('');
 
-	// @todo - To be fixed
-	// const searchProjectsByTitle = projectsData.filter((item) => {
-	// 	const result = item.title
-	// 		.toLowerCase()
-	// 		.includes(searchProject.toLowerCase())
-	// 		? item
-	// 		: searchProject == ''
-	// 		? item
-	// 		: '';
-	// 	return result;
-	// });
+	const filteredProjects = projectsData.filter((project) => {
+		const matchesTitle =
+			searchProject === '' ||
+			project.title.toLowerCase().includes(searchProject.toLowerCase());
+		const matchesCategory =
+			selectProject === ''
+				? true
+				: (project.category.charAt(0).toUpperCase() + project.category.slice(1)).includes(selectProject);
 
-	const selectProjectsByCategory = projectsData.filter((item) => {
-		let category =
-			item.category.charAt(0).toUpperCase() + item.category.slice(1);
-		return category.includes(selectProject);
+		return matchesTitle && matchesCategory;
 	});
 
 	return (
@@ -73,8 +67,8 @@ function ProjectsGrid() {
 							<FiSearch className="text-ternary-dark dark:text-ternary-light w-5 h-5"></FiSearch>
 						</span>
 						<input
-							onChange={(e) => {
-								setSearchProject(e.target.value);
+							onInput={(e) => {
+								setSearchProject(e.target.value.trim());
 							}}
 							className="
                                 ont-general-medium 
@@ -102,18 +96,14 @@ function ProjectsGrid() {
 						/>
 					</div>
 
-					<ProjectsFilter setSelectProject={setSelectProject} />
+					<ProjectsFilter selectProject={selectProject} setSelectProject={setSelectProject} />
 				</div>
 			</div>
 
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-6 sm:gap-5">
-				{selectProject
-					? selectProjectsByCategory.map((project, index) => {
-							return <ProjectSingle key={index} {...project} />;
-					  })
-					: projectsData.map((project, index) => (
-							<ProjectSingle key={index} {...project} />
-					  ))}
+				{filteredProjects.map((project, index) => (
+					<ProjectSingle key={index} {...project} />
+				))}
 			</div>
 		</section>
 	);
